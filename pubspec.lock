@@ -76,10 +76,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "2a8fdf5bdb4b463b836026225dc9afe25a3e6f94"
+      resolved-ref: "70f145d2b8b0f29b415930a1c9b3bb958fe8bd80"
       url: "git://github.com/Dokotela/fhir_at_rest.git"
     source: git
-    version: "0.0.4"
+    version: "0.0.5"
   flutter:
     dependency: "direct main"
     description: flutter

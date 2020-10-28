@@ -1,5 +1,5 @@
 name: create_patient
-description: A new Flutter project.
+description: A flutter app that creates a (very) simple patient using the fhir package.
 
 publish_to: 'none' 
 version: 1.0.0+1
