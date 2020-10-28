@@ -1,0 +1,33 @@
+name: create_patient
+description: A new Flutter project.
+
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fhir: ^0.0.10
+  fhir_at_rest:
+    git:
+      url: git://github.com/Dokotela/fhir_at_rest.git
+  get: ^3.15.0
+  url_launcher: ^5.7.8
+  cupertino_icons: ^1.0.0
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+flutter:
+  uses-material-design: true
+
+        
+    
+    
+                                      
