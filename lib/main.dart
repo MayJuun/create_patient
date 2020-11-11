@@ -46,12 +46,16 @@ class CreatePatient extends StatelessWidget {
             children: <Widget>[
               SmallActionButton(
                   title: 'Hapi: Create',
-                  onPressed: () =>
-                      _hapiCreate(_firstName.text, _lastName.text)),
+                  onPressed: () => _hapiCreate(
+                        _firstName.text,
+                        _lastName.text,
+                      )),
               SmallActionButton(
                   title: 'Hapi: Search',
-                  onPressed: () =>
-                      _hapiSearch(_firstName.text, _lastName.text)),
+                  onPressed: () => _hapiSearch(
+                        _firstName.text,
+                        _lastName.text,
+                      )),
             ],
           )
         ],
@@ -95,9 +99,15 @@ class CreatePatient extends StatelessWidget {
                 ' ${(r as Patient).name[0].family} created'));
   }
 
-  Future _hapiSearch(String lastName, String firstName) async {
+  Future _hapiSearch(
+    String lastName,
+    String firstName,
+  ) async {
     await launch('http://hapi.fhir.org/baseR4/'
-        'Patient?given=$firstName&family=$lastName&_pretty=true');
+        'Patient?'
+        'given=$firstName&'
+        'family=$lastName&'
+        '_pretty=true');
   }
 }
 
