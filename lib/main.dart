@@ -26,36 +26,36 @@ class MyApp extends StatelessWidget {
 class CreatePatient extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<CreatePatientController>(
-      init: CreatePatientController(),
-      builder: (data) => data.isBusy
-          ? Center(child: CircularProgressIndicator())
-          : Scaffold(
-              body: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  //* Hapi FHIR calls
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      _nameContainer(data.lastName, 'Last name'),
-                      _nameContainer(data.firstName, 'First name'),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      SmallActionButton(
-                          title: 'Hapi: Create',
-                          onPressed: () => data.hapiCreate()),
-                      SmallActionButton(
-                          title: 'Hapi: Search',
-                          onPressed: () => data.hapiSearch()),
-                    ],
-                  )
-                ],
-              ),
-            ),
+    final _lastName = TextEditingController();
+    final _firstName = TextEditingController();
+
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          //* Hapi FHIR calls
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              _nameContainer(_lastName, 'Last name'),
+              _nameContainer(_firstName, 'First name'),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              SmallActionButton(
+                  title: 'Hapi: Create',
+                  onPressed: () =>
+                      _hapiCreate(_firstName.text, _lastName.text)),
+              SmallActionButton(
+                  title: 'Hapi: Search',
+                  onPressed: () =>
+                      _hapiSearch(_firstName.text, _lastName.text)),
+            ],
+          )
+        ],
+      ),
     );
   }
 
@@ -68,26 +68,14 @@ class CreatePatient extends StatelessWidget {
           decoration: InputDecoration(hintText: text),
         ),
       );
-}
 
-class CreatePatientController extends GetxController {
-  bool isBusy = false;
-
-  final _lastName = TextEditingController();
-  final _firstName = TextEditingController();
-
-  TextEditingController get lastName => _lastName;
-  TextEditingController get firstName => _firstName;
-
-  Future hapiCreate() async {
-    isBusy = true;
-    update();
+  Future _hapiCreate(String lastName, String firstName) async {
     var newPatient = Patient(
       resourceType: 'Patient',
       name: [
         HumanName(
-          given: [_firstName.text],
-          family: _lastName.text,
+          given: [firstName],
+          family: lastName,
         ),
       ],
     );
@@ -105,17 +93,11 @@ class CreatePatientController extends GetxController {
             title: 'Success',
             message: 'Patient ${(r as Patient).name[0].given[0]}'
                 ' ${(r as Patient).name[0].family} created'));
-    isBusy = false;
-    update();
   }
 
-  Future hapiSearch() async {
-    isBusy = true;
-    update();
+  Future _hapiSearch(String lastName, String firstName) async {
     await launch('http://hapi.fhir.org/baseR4/'
-        'Patient?given=${_firstName.text}&family=${_lastName.text}&_pretty=true');
-    isBusy = false;
-    update();
+        'Patient?given=$firstName&family=$lastName&_pretty=true');
   }
 }
 
