@@ -1,6 +1,5 @@
 import 'package:fhir/r4.dart';
-import 'package:fhir_at_rest/requests/request_types.dart';
-import 'package:fhir_at_rest/resource_types/resource_types.dart';
+import 'package:fhir_at_rest/r4.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -51,11 +50,12 @@ class CreatePatient extends StatelessWidget {
                         _lastName.text,
                       )),
               SmallActionButton(
-                  title: 'Hapi: Search',
-                  onPressed: () => _hapiSearch(
-                        _firstName.text,
-                        _lastName.text,
-                      )),
+                title: 'Hapi: Search',
+                onPressed: () => _hapiSearch(
+                  _firstName.text,
+                  _lastName.text,
+                ),
+              ),
             ],
           )
         ],
@@ -75,7 +75,7 @@ class CreatePatient extends StatelessWidget {
 
   Future _hapiCreate(String lastName, String firstName) async {
     var newPatient = Patient(
-      resourceType: 'Patient',
+      resourceType: R4ResourceType.Patient,
       name: [
         HumanName(
           given: [firstName],
@@ -83,20 +83,22 @@ class CreatePatient extends StatelessWidget {
         ),
       ],
     );
-    var newRequest = CreateRequest.r4(
+    var newRequest = FhirRequest.create(
       base: Uri.parse('https://hapi.fhir.org/baseR4'),
-      type: R4Types.patient,
+      resource: newPatient,
     );
-    var response = await newRequest.request(resource: newPatient);
-    response.fold((l) {
-      Get.snackbar('Failure', '${l.errorMessage()}',
+    var response = await newRequest
+        .request(headers: {'Content-Type': 'application/fhir+json'});
+    if (response?.resourceType == R4ResourceType.Patient) {
+      Get.rawSnackbar(
+          title: 'Success',
+          message: 'Patient ${(response as Patient).name?[0].given?[0]}'
+              ' ${response.name?[0].family} created');
+    } else {
+      Get.snackbar('Failure', '${response?.toJson()}',
           snackPosition: SnackPosition.BOTTOM);
-      print(l.errorMessage());
-    },
-        (r) => Get.rawSnackbar(
-            title: 'Success',
-            message: 'Patient ${(r as Patient).name[0].given[0]}'
-                ' ${(r as Patient).name[0].family} created'));
+      print(response?.toJson());
+    }
   }
 
   Future _hapiSearch(
@@ -115,19 +117,15 @@ class SmallActionButton extends StatelessWidget {
   final String title;
   final void Function() onPressed;
 
-  const SmallActionButton({Key key, @required this.title, this.onPressed})
+  const SmallActionButton(
+      {Key? key, required this.title, required this.onPressed})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ButtonTheme.fromButtonThemeData(
       data: Get.theme.buttonTheme.copyWith(minWidth: Get.width / 3),
-      child: RaisedButton(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-          child: Text(title),
-          onPressed: onPressed),
+      child: ElevatedButton(child: Text(title), onPressed: onPressed),
     );
   }
 }
