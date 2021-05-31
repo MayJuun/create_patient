@@ -46,14 +46,14 @@ class CreatePatient extends StatelessWidget {
               SmallActionButton(
                   title: 'Hapi: Create',
                   onPressed: () => _hapiCreate(
-                        _firstName.text,
                         _lastName.text,
+                        _firstName.text,
                       )),
               SmallActionButton(
                 title: 'Hapi: Search',
                 onPressed: () => _hapiSearch(
-                  _firstName.text,
                   _lastName.text,
+                  _firstName.text,
                 ),
               ),
             ],
