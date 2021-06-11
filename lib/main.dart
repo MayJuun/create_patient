@@ -25,8 +25,21 @@ class MyApp extends StatelessWidget {
 class CreatePatient extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    /// Text editing controllers for names
     final _lastName = TextEditingController();
     final _firstName = TextEditingController();
+    Id? patientId;
+
+    /// Container for entering a name
+    Container _nameContainer(TextEditingController name, String text) =>
+        Container(
+          width: Get.width / 3,
+          margin: EdgeInsets.symmetric(horizontal: 8),
+          child: TextField(
+            controller: name,
+            decoration: InputDecoration(hintText: text),
+          ),
+        );
 
     return Scaffold(
       body: Column(
@@ -36,6 +49,7 @@ class CreatePatient extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
+              /// Call the name containers, one for first and last name
               _nameContainer(_lastName, 'Last name'),
               _nameContainer(_firstName, 'First name'),
             ],
@@ -43,17 +57,24 @@ class CreatePatient extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
+              /// Buttons created to do something
+              /// Creates the patient on a HAPI server
               SmallActionButton(
                   title: 'Hapi: Create',
-                  onPressed: () => _hapiCreate(
-                        _firstName.text,
-                        _lastName.text,
-                      )),
+                  onPressed: () async {
+                    patientId = await _hapiCreate(
+                      _firstName.text,
+                      _lastName.text,
+                    );
+                  }),
+
+              /// Launches that patient on a HAPI server
               SmallActionButton(
                 title: 'Hapi: Search',
                 onPressed: () => _hapiSearch(
                   _firstName.text,
                   _lastName.text,
+                  patientId,
                 ),
               ),
             ],
@@ -63,19 +84,8 @@ class CreatePatient extends StatelessWidget {
     );
   }
 
-  Container _nameContainer(TextEditingController name, String text) =>
-      Container(
-        width: Get.width / 3,
-        margin: EdgeInsets.symmetric(horizontal: 8),
-        child: TextField(
-          controller: name,
-          decoration: InputDecoration(hintText: text),
-        ),
-      );
-
-  Future _hapiCreate(String lastName, String firstName) async {
+  Future<Id?> _hapiCreate(String lastName, String firstName) async {
     var newPatient = Patient(
-      resourceType: R4ResourceType.Patient,
       name: [
         HumanName(
           given: [firstName],
@@ -94,22 +104,32 @@ class CreatePatient extends StatelessWidget {
           title: 'Success',
           message: 'Patient ${(response as Patient).name?[0].given?[0]}'
               ' ${response.name?[0].family} created');
+      print(response.toJson());
     } else {
       Get.snackbar('Failure', '${response?.toJson()}',
           snackPosition: SnackPosition.BOTTOM);
       print(response?.toJson());
     }
+    return response?.id;
   }
 
   Future _hapiSearch(
     String lastName,
     String firstName,
+    Id? patientId,
   ) async {
-    await launch('http://hapi.fhir.org/baseR4/'
-        'Patient?'
-        'given=$firstName&'
-        'family=$lastName&'
-        '_pretty=true');
+    if (patientId != null) {
+      await launch('http://hapi.fhir.org/baseR4/'
+          'Patient'
+          '?_id=$patientId'
+          '&_pretty=true');
+    } else {
+      await launch('http://hapi.fhir.org/baseR4/'
+          'Patient'
+          '?given=$firstName'
+          '&family=$lastName'
+          '&_pretty=true');
+    }
   }
 }
 
