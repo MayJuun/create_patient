@@ -1,0 +1,29 @@
+name: create_patient
+description: A flutter app that creates a (very) simple patient using the fhir package.
+
+publish_to: 'none' 
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.1 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fhir: ^0.4.6
+  fhir_at_rest: ^0.4.2
+  get: ^4.1.4
+  url_launcher: ^6.0.3
+  cupertino_icons: ^1.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+        
+    
+    
+                                      
