@@ -2,13 +2,15 @@ import 'package:fhir/r4.dart';
 import 'package:fhir_at_rest/r4.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -17,24 +19,26 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: CreatePatient(),
+      home: const CreatePatient(),
     );
   }
 }
 
 class CreatePatient extends StatelessWidget {
+  const CreatePatient({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     /// Text editing controllers for names
-    final _lastName = TextEditingController();
-    final _firstName = TextEditingController();
+    final lastName = TextEditingController();
+    final firstName = TextEditingController();
     Id? patientId;
 
     /// Container for entering a name
     Container _nameContainer(TextEditingController name, String text) =>
         Container(
           width: Get.width / 3,
-          margin: EdgeInsets.symmetric(horizontal: 8),
+          margin: const EdgeInsets.symmetric(horizontal: 8),
           child: TextField(
             controller: name,
             decoration: InputDecoration(hintText: text),
@@ -50,8 +54,8 @@ class CreatePatient extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               /// Call the name containers, one for first and last name
-              _nameContainer(_lastName, 'Last name'),
-              _nameContainer(_firstName, 'First name'),
+              _nameContainer(lastName, 'Last name'),
+              _nameContainer(firstName, 'First name'),
             ],
           ),
           Row(
@@ -63,8 +67,8 @@ class CreatePatient extends StatelessWidget {
                   title: 'Hapi: Create',
                   onPressed: () async {
                     patientId = await _hapiCreate(
-                      _firstName.text,
-                      _lastName.text,
+                      firstName.text,
+                      lastName.text,
                     );
                   }),
 
@@ -72,8 +76,8 @@ class CreatePatient extends StatelessWidget {
               SmallActionButton(
                 title: 'Hapi: Search',
                 onPressed: () => _hapiSearch(
-                  _firstName.text,
-                  _lastName.text,
+                  firstName.text,
+                  lastName.text,
                   patientId,
                 ),
               ),
@@ -99,18 +103,18 @@ class CreatePatient extends StatelessWidget {
     );
     var response = await newRequest
         .request(headers: {'Content-Type': 'application/fhir+json'});
-    if (response?.resourceType == R4ResourceType.Patient) {
+    if (response.resourceType == R4ResourceType.Patient) {
       Get.rawSnackbar(
           title: 'Success',
           message: 'Patient ${(response as Patient).name?[0].given?[0]}'
               ' ${response.name?[0].family} created');
       print(response.toJson());
     } else {
-      Get.snackbar('Failure', '${response?.toJson()}',
+      Get.snackbar('Failure', '${response.toJson()}',
           snackPosition: SnackPosition.BOTTOM);
-      print(response?.toJson());
+      print(response.toJson());
     }
-    return response?.id;
+    return response.id;
   }
 
   Future _hapiSearch(
@@ -119,12 +123,12 @@ class CreatePatient extends StatelessWidget {
     Id? patientId,
   ) async {
     if (patientId != null) {
-      await launch('http://hapi.fhir.org/baseR4/'
+      await launchUrlString('http://hapi.fhir.org/baseR4/'
           'Patient'
           '?_id=$patientId'
           '&_pretty=true');
     } else {
-      await launch('http://hapi.fhir.org/baseR4/'
+      await launchUrlString('http://hapi.fhir.org/baseR4/'
           'Patient'
           '?given=$firstName'
           '&family=$lastName'
@@ -134,18 +138,18 @@ class CreatePatient extends StatelessWidget {
 }
 
 class SmallActionButton extends StatelessWidget {
-  final String title;
-  final void Function() onPressed;
-
   const SmallActionButton(
       {Key? key, required this.title, required this.onPressed})
       : super(key: key);
+
+  final String title;
+  final void Function() onPressed;
 
   @override
   Widget build(BuildContext context) {
     return ButtonTheme.fromButtonThemeData(
       data: Get.theme.buttonTheme.copyWith(minWidth: Get.width / 3),
-      child: ElevatedButton(child: Text(title), onPressed: onPressed),
+      child: ElevatedButton(onPressed: onPressed, child: Text(title)),
     );
   }
 }
